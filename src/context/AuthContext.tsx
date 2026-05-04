@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { onAuthStateChanged, User as FirebaseUser, signInWithPopup, GoogleAuthProvider, signOut } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db } from "@/src/lib/firebase";
 import { User, UserRole } from "@/src/types";
 
@@ -22,12 +22,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         try {
-          // Fetch additional user data (role) from Firestore
-          const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
+          const userRef = doc(db, "users", firebaseUser.uid);
+          const userDoc = await getDoc(userRef);
+          
           if (userDoc.exists()) {
             setUser(userDoc.data() as User);
           } else {
-            // New user, default role is CUSTOMER
             const newUser: User = {
               uid: firebaseUser.uid,
               email: firebaseUser.email || "",
@@ -35,9 +35,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               role: UserRole.CUSTOMER,
               createdAt: Date.now(),
             };
+            // SAVE TO FIRESTORE
+            await setDoc(userRef, newUser);
             setUser(newUser);
-            // Note: In a real app, we'd save this to Firestore here
-            // but for safety we'll assume the user profile is created on first sign-in
           }
         } catch (error) {
           console.error("Error fetching user data:", error);

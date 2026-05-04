@@ -1,10 +1,19 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore, doc, getDocFromServer } from 'firebase/firestore';
-import firebaseConfig from '@/firebase-applet-config.json';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBIqN8ShmHBN0ZdKok1gmqauYgyZbiMgOc",
+  authDomain: "fir-m-wardrobe.firebaseapp.com",
+  projectId: "fir-m-wardrobe",
+  storageBucket: "fir-m-wardrobe.firebasestorage.app",
+  messagingSenderId: "681490582788",
+  appId: "1:681490582788:web:fba483190a23c900ad5451",
+  measurementId: "G-4R1RY299SZ"
+};
 
 const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
+export const db = getFirestore(app);
 export const auth = getAuth(app);
 
 // Connectivity check

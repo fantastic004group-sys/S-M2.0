@@ -1,0 +1,70 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Default Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Global Helpers
+    function isSignedIn() { return request.auth != null; }
+    function isOwner(userId) { return isSignedIn() && request.auth.uid == userId; }
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    
+    // Auth token doesn't have custom claims by default in this setup, 
+    // so we check a trusted 'admins' collection or a specific field in 'users'.
+    // Here we check the user doc role.
+    function isAdmin() { 
+      return isSignedIn() && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'ADMIN'; 
+    }
+
+    // 1. Users
+    match /users/{userId} {
+      allow get: if isOwner(userId) || isAdmin();
+      allow list: if isAdmin();
+      allow create: if isSignedIn() && isOwner(userId) && 
+        incoming().role == 'CUSTOMER' && // Default role
+        incoming().keys().hasAll(['uid', 'email', 'role', 'createdAt']) &&
+        incoming().keys().size() == 4;
+      allow update: if isOwner(userId) && 
+        incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'updatedAt']);
+    }
+
+    // 2. Products
+    match /products/{productId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // 3. Orders
+    match /orders/{orderId} {
+      allow get: if isSignedIn() && (isOwner(existing().userId) || isAdmin());
+      allow list: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
+      allow create: if isSignedIn() && isOwner(incoming().userId) &&
+        incoming().keys().hasAll(['userId', 'items', 'totalAmount', 'status', 'shippingAddress', 'createdAt', 'updatedAt']) &&
+        incoming().status == 'PLACED';
+      allow update: if isAdmin() && 
+        incoming().diff(existing()).affectedKeys().hasAny(['status', 'updatedAt']);
+    }
+
+    // 4. Reviews
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow create: if isSignedIn() && isOwner(incoming().userId);
+      allow delete: if isSignedIn() && (isOwner(existing().userId) || isAdmin());
+    }
+
+    // 5. Visits (Analytics)
+    match /visits/{visitId} {
+      allow read, write: if isAdmin();
+    }
+
+    // Connectivity Test
+    match /test/connection {
+      allow get: if true;
+    }
+  }
+}

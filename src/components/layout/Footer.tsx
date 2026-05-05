@@ -1,8 +1,9 @@
-import React from "react";
 import { Link } from "react-router-dom";
 import { Facebook, Instagram, Twitter, MapPin, Phone, Mail } from "lucide-react";
 
 export default function Footer() {
+  const currentYear = new Date().getFullYear();
+
   return (
     <footer className="bg-[#1A1A1A] text-white pt-20 pb-10">
       <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
@@ -14,9 +15,9 @@ export default function Footer() {
             Preserving the heritage of Bengali craftsmanship through contemporary design. Every thread tells a story of tradition.
           </p>
           <div className="flex space-x-4">
-            <a href="#" className="hover:text-[#D4AF37] transition-colors"><Instagram size={20} /></a>
-            <a href="#" className="hover:text-[#D4AF37] transition-colors"><Facebook size={20} /></a>
-            <a href="#" className="hover:text-[#D4AF37] transition-colors"><Twitter size={20} /></a>
+            <a href="#" className="hover:text-[#D4AF37] transition-colors" aria-label="Instagram"><Instagram size={20} /></a>
+            <a href="#" className="hover:text-[#D4AF37] transition-colors" aria-label="Facebook"><Facebook size={20} /></a>
+            <a href="#" className="hover:text-[#D4AF37] transition-colors" aria-label="Twitter"><Twitter size={20} /></a>
           </div>
         </div>
 
@@ -25,8 +26,8 @@ export default function Footer() {
           <ul className="space-y-4 text-sm text-gray-400">
             <li><Link to="/products" className="hover:text-white transition-colors">New Arrivals</Link></li>
             <li><Link to="/category/saree" className="hover:text-white transition-colors">Saree Collection</Link></li>
-            <li><Link to="/category/salwar" className="hover:text-white transition-colors">Salwar Kameez</Link></li>
-            <li><Link to="/category/bridal" className="hover:text-white transition-colors">Bridal Wear</Link></li>
+            <li><Link to="/category/salwar-kameez" className="hover:text-white transition-colors">Salwar Kameez</Link></li>
+            <li><Link to="/category/traditional" className="hover:text-white transition-colors">Traditional Wear</Link></li>
           </ul>
         </div>
 
@@ -50,11 +51,11 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 pt-8 border-t border-white/10 flex flex-col md:row items-center justify-between gap-4 text-xs text-gray-500 uppercase tracking-widest">
-        <p>© 2024 S&M Wardrobe. All Rights Reserved.</p>
+      <div className="max-w-7xl mx-auto px-4 pt-8 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-gray-500 uppercase tracking-widest">
+        <p>&copy; {currentYear} S&M Wardrobe. All Rights Reserved.</p>
         <div className="flex gap-6">
-          <Link to="/terms" className="hover:text-white">Terms of Service</Link>
-          <Link to="/privacy" className="hover:text-white">Privacy Policy</Link>
+          <Link to="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
+          <Link to="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
         </div>
       </div>
     </footer>

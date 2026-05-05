@@ -1,8 +1,8 @@
 import React from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ShoppingCart, User, Search, Menu, X, LogOut, ShieldCheck } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-import { THEME, BENGALI_STRINGS } from "@/src/constants";
+import { BENGALI_STRINGS } from "@/src/constants";
 import { useCart } from "@/src/context/CartContext";
 import { useAuth } from "@/src/context/AuthContext";
 
@@ -11,6 +11,8 @@ export default function Navbar() {
   const { user, isAdmin, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const [lang, setLang] = React.useState<"en" | "bn">("en");
+  const [searchQuery, setSearchQuery] = React.useState("");
+  const location = useLocation();
   const navigate = useNavigate();
   
   const t = BENGALI_STRINGS[lang];
@@ -22,6 +24,14 @@ export default function Navbar() {
     { name: "Traditional", path: "/category/traditional" },
   ];
 
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/products?q=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery("");
+    }
+  };
+
   return (
     <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-warm-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -31,6 +41,7 @@ export default function Navbar() {
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="text-[#2D2D2D] hover:text-crimson transition-colors"
+              aria-label="Toggle menu"
             >
               {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
@@ -64,21 +75,25 @@ export default function Navbar() {
 
           {/* Actions */}
           <div className="flex items-center space-x-5">
-            <div className="hidden lg:block relative">
+            <form onSubmit={handleSearch} className="hidden lg:block relative">
                <input 
-                 type="text" 
+                 type="text"
+                 value={searchQuery}
+                 onChange={(e) => setSearchQuery(e.target.value)}
                  placeholder="Search collections..." 
                  className="bg-[#f0f0eb] border-none rounded-full py-2 px-5 text-[11px] w-48 focus:ring-1 focus:ring-olive transition-all"
                />
-               <Search size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400" />
-            </div>
+               <button type="submit" className="absolute right-4 top-1/2 -translate-y-1/2" aria-label="Search">
+                 <Search size={14} className="text-gray-400" />
+               </button>
+            </form>
             <button 
               onClick={() => setLang(lang === "en" ? "bn" : "en")}
               className="text-[10px] font-bold border border-warm-border px-2 py-1 rounded text-gray-500 hover:bg-natural-bg transition-all"
             >
               {lang === "en" ? "BN" : "EN"}
             </button>
-            <Link to="/cart" className="text-[#2D2D2D] hover:text-crimson transition-colors relative p-2 hover:bg-gray-100 rounded-full transition-colors">
+            <Link to="/cart" className="text-[#2D2D2D] hover:text-crimson relative p-2 hover:bg-gray-100 rounded-full transition-colors">
               <ShoppingCart size={20} />
               {totalItems > 0 && (
                 <span className="absolute top-1 right-1 bg-crimson text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">
@@ -90,11 +105,11 @@ export default function Navbar() {
             {user ? (
               <div className="flex items-center gap-4">
                  {isAdmin && (
-                   <Link to="/admin" className="text-[#D4AF37] hover:text-[#8B0000]" title="Admin Panel">
+                   <Link to="/admin" className="text-[#D4AF37] hover:text-[#8B0000] transition-colors" title="Admin Panel">
                      <ShieldCheck size={20} />
                    </Link>
                  )}
-                 <button onClick={logout} className="text-[#2F2F2F] hover:text-[#8B0000]" title="Logout">
+                 <button onClick={logout} className="text-[#2F2F2F] hover:text-[#8B0000] transition-colors" title="Logout">
                    <LogOut size={20} />
                  </button>
               </div>
@@ -127,6 +142,13 @@ export default function Navbar() {
                   {item.name}
                 </Link>
               ))}
+              <Link
+                to="/products"
+                className="block px-3 py-4 text-base font-medium text-crimson"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                View All Products
+              </Link>
             </div>
           </motion.div>
         )}

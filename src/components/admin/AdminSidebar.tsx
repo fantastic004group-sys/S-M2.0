@@ -1,10 +1,11 @@
-import React from "react";
-import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, ShoppingBag, Package, BarChart3, Settings, LogOut } from "lucide-react";
-import { THEME } from "@/src/constants";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { LayoutDashboard, ShoppingBag, Package, BarChart3, LogOut, Home } from "lucide-react";
+import { useAuth } from "@/src/context/AuthContext";
 
 export default function AdminSidebar() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { logout } = useAuth();
 
   const links = [
     { name: "Dashboard", path: "/admin", icon: LayoutDashboard },
@@ -12,6 +13,11 @@ export default function AdminSidebar() {
     { name: "Orders", path: "/admin/orders", icon: ShoppingBag },
     { name: "Analytics", path: "/admin/analytics", icon: BarChart3 },
   ];
+
+  const handleLogout = async () => {
+    await logout();
+    navigate("/");
+  };
 
   return (
     <aside className="w-64 bg-[#1A1A1A] text-white flex flex-col min-h-screen">
@@ -46,11 +52,17 @@ export default function AdminSidebar() {
       </nav>
 
       <div className="p-6 border-t border-white/5 space-y-4">
-         <button className="flex items-center gap-3 w-full px-4 py-3 text-sm text-gray-400 hover:text-white transition-colors">
-            <Settings size={20} />
-            <span>Settings</span>
-         </button>
-         <button className="flex items-center gap-3 w-full px-4 py-3 text-sm text-red-400 hover:text-red-300 transition-colors">
+         <Link
+           to="/"
+           className="flex items-center gap-3 w-full px-4 py-3 text-sm text-gray-400 hover:text-white transition-colors"
+         >
+            <Home size={20} />
+            <span>Back to Store</span>
+         </Link>
+         <button
+           onClick={handleLogout}
+           className="flex items-center gap-3 w-full px-4 py-3 text-sm text-red-400 hover:text-red-300 transition-colors"
+         >
             <LogOut size={20} />
             <span>Logout</span>
          </button>

@@ -4,7 +4,6 @@ import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/src/lib/firebase";
 import { Product } from "@/src/types";
 import { useCart } from "@/src/context/CartContext";
-import { MOCK_PRODUCTS } from "@/src/data/products";
 import { ShoppingCart, Heart, ChevronRight, Minus, Plus, Truck, RotateCcw, Shield } from "lucide-react";
 import { motion } from "motion/react";
 import ZoomPage, { ZoomSection } from "@/src/components/ui/ZoomPage";
@@ -26,12 +25,11 @@ export default function ProductDetailPage() {
         if (docSnap.exists()) {
           setProduct({ id: docSnap.id, ...docSnap.data() } as Product);
         } else {
-          const mock = MOCK_PRODUCTS.find((p) => p.id === id);
-          setProduct(mock || null);
+          setProduct(null);
         }
-      } catch {
-        const mock = MOCK_PRODUCTS.find((p) => p.id === id);
-        setProduct(mock || null);
+      } catch (error) {
+        console.error("Error fetching product:", error);
+        setProduct(null);
       } finally {
         setLoading(false);
       }

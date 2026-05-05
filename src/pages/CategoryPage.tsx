@@ -4,7 +4,6 @@ import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "@/src/lib/firebase";
 import { Product } from "@/src/types";
 import ProductCard from "@/src/components/product/ProductCard";
-import { MOCK_PRODUCTS } from "@/src/data/products";
 import { ChevronRight } from "lucide-react";
 import ZoomPage, { ZoomSection } from "@/src/components/ui/ZoomPage";
 
@@ -32,13 +31,9 @@ export default function CategoryPage() {
         const q = query(collection(db, "products"), where("category", "==", categoryName));
         const snapshot = await getDocs(q);
         const items = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as Product[];
-        if (items.length > 0) {
-          setProducts(items);
-        } else {
-          setProducts(MOCK_PRODUCTS.filter((p) => p.category === categoryName));
-        }
-      } catch {
-        setProducts(MOCK_PRODUCTS.filter((p) => p.category === categoryName));
+        setProducts(items);
+      } catch (error) {
+        console.error("Error fetching category products:", error);
       } finally {
         setLoading(false);
       }

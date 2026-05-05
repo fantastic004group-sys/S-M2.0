@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
+import ZoomPage from "@/src/components/ui/ZoomPage";
 
 interface StaticPageProps {
   title: string;
@@ -8,17 +9,22 @@ interface StaticPageProps {
 
 function StaticPageLayout({ title, children }: StaticPageProps) {
   return (
-    <div className="max-w-4xl mx-auto px-4 py-16">
-      <nav className="flex items-center gap-2 text-sm text-gray-400 mb-8">
-        <Link to="/" className="hover:text-crimson transition-colors">Home</Link>
-        <ChevronRight size={14} />
-        <span className="text-[#2D2D2D] font-semibold">{title}</span>
-      </nav>
-      <h1 className="text-4xl font-display text-[#2D2D2D] mb-8">{title}</h1>
-      <div className="prose prose-gray max-w-none text-gray-600 leading-relaxed space-y-6">
-        {children}
+    <ZoomPage>
+      {/* Single scrollable section for static content */}
+      <div className="min-h-full bg-natural-bg py-16">
+        <div className="max-w-4xl mx-auto px-4">
+          <nav className="flex items-center gap-2 text-sm text-gray-400 mb-8">
+            <Link to="/" className="hover:text-crimson transition-colors">Home</Link>
+            <ChevronRight size={14} />
+            <span className="text-[#2D2D2D] font-semibold">{title}</span>
+          </nav>
+          <h1 className="text-4xl font-display text-[#2D2D2D] mb-8">{title}</h1>
+          <div className="prose prose-gray max-w-none text-gray-600 leading-relaxed space-y-6">
+            {children}
+          </div>
+        </div>
       </div>
-    </div>
+    </ZoomPage>
   );
 }
 

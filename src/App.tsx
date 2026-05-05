@@ -6,6 +6,8 @@ import CartPage from "./pages/CartPage";
 import LoginPage from "./pages/LoginPage";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import ProductManager from "./pages/admin/ProductManager";
+import OrdersManager from "./pages/admin/OrdersManager";
+import AnalyticsDashboard from "./pages/admin/AnalyticsDashboard";
 import ProductsPage from "./pages/ProductsPage";
 import CategoryPage from "./pages/CategoryPage";
 import ProductDetailPage from "./pages/ProductDetailPage";
@@ -154,8 +156,8 @@ export default function App() {
               {/* Admin Routes - Protected */}
               <Route path="/admin" element={<ProtectedRoute requireAdmin><AdminDashboard /></ProtectedRoute>} />
               <Route path="/admin/products" element={<ProtectedRoute requireAdmin><ProductManager /></ProtectedRoute>} />
-              <Route path="/admin/orders" element={<ProtectedRoute requireAdmin><AdminDashboard /></ProtectedRoute>} />
-              <Route path="/admin/analytics" element={<ProtectedRoute requireAdmin><AdminDashboard /></ProtectedRoute>} />
+              <Route path="/admin/orders" element={<ProtectedRoute requireAdmin><OrdersManager /></ProtectedRoute>} />
+              <Route path="/admin/analytics" element={<ProtectedRoute requireAdmin><AnalyticsDashboard /></ProtectedRoute>} />
             </Routes>
           </Router>
         </CartProvider>

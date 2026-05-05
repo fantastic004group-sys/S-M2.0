@@ -19,40 +19,48 @@ import ProtectedRoute from "./components/auth/ProtectedRoute";
 import ErrorBoundary from "./components/ui/ErrorBoundary";
 import { MOCK_PRODUCTS } from "./data/products";
 import { Link } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Sparkles, Award, Heart } from "lucide-react";
+import ZoomScrollContainer from "./components/ui/ZoomScrollContainer";
+import Footer from "./components/layout/Footer";
 
 function Home() {
   return (
-    <div className="space-y-20 pb-20">
-      <Hero />
-      
-      <section className="max-w-7xl mx-auto px-4">
-        <div className="flex flex-col md:flex-row items-baseline justify-between mb-12 gap-4">
-          <div>
-            <h2 className="text-4xl font-display text-[#2F2F2F] mb-2 uppercase tracking-tight">
-              New <span className="italic text-[#8B0000]">Arrivals</span>
-            </h2>
-            <div className="h-1 w-20 bg-[#D4AF37]" />
+    <ZoomScrollContainer>
+      {/* Section 1: Hero */}
+      <div className="h-full">
+        <Hero />
+      </div>
+
+      {/* Section 2: New Arrivals */}
+      <div className="h-full flex items-center bg-natural-bg">
+        <section className="max-w-7xl mx-auto px-4 w-full py-10">
+          <div className="flex flex-col md:flex-row items-baseline justify-between mb-12 gap-4">
+            <div>
+              <h2 className="text-4xl font-display text-[#2F2F2F] mb-2 uppercase tracking-tight">
+                New <span className="italic text-[#8B0000]">Arrivals</span>
+              </h2>
+              <div className="h-1 w-20 bg-[#D4AF37]" />
+            </div>
+            <Link
+              to="/products"
+              className="text-xs font-bold uppercase tracking-widest text-[#8B0000] border-b-2 border-[#8B0000] pb-1 hover:text-[#D4AF37] hover:border-[#D4AF37] transition-all flex items-center gap-1"
+            >
+              View All Collection
+              <ArrowRight size={14} />
+            </Link>
           </div>
-          <Link
-            to="/products"
-            className="text-xs font-bold uppercase tracking-widest text-[#8B0000] border-b-2 border-[#8B0000] pb-1 hover:text-[#D4AF37] hover:border-[#D4AF37] transition-all flex items-center gap-1"
-          >
-            View All Collection
-            <ArrowRight size={14} />
-          </Link>
-        </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {MOCK_PRODUCTS.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
-      </section>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {MOCK_PRODUCTS.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        </section>
+      </div>
 
-      {/* Featured Banner */}
-      <section className="bg-[#8B0000] py-20 overflow-hidden relative">
-        <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center gap-12 relative z-10">
+      {/* Section 3: Heritage Banner */}
+      <div className="h-full flex items-center bg-[#8B0000] overflow-hidden relative">
+        <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center gap-12 relative z-10 w-full">
           <div className="flex-1 text-center md:text-left">
              <h3 className="text-4xl md:text-6xl font-display text-white mb-6 leading-tight">
                 Heritage <br />Of Handloom
@@ -81,8 +89,48 @@ function Home() {
         <div className="absolute top-0 right-0 w-full h-full opacity-10 pointer-events-none">
            <div className="absolute top-10 right-10 text-white font-display text-[15rem] leading-none select-none">{'\u0993'}</div>
         </div>
-      </section>
-    </div>
+      </div>
+
+      {/* Section 4: Why Choose Us */}
+      <div className="h-full flex items-center bg-natural-bg">
+        <div className="max-w-7xl mx-auto px-4 w-full">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-display text-[#2F2F2F] mb-4 uppercase tracking-tight">
+              Why <span className="italic text-[#8B0000]">Choose Us</span>
+            </h2>
+            <div className="h-1 w-20 bg-[#D4AF37] mx-auto" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+            <div className="text-center space-y-4">
+              <div className="w-20 h-20 bg-crimson/10 rounded-full flex items-center justify-center mx-auto">
+                <Sparkles className="text-crimson" size={32} />
+              </div>
+              <h3 className="text-xl font-display text-[#2D2D2D]">Artisan Crafted</h3>
+              <p className="text-gray-500 text-sm leading-relaxed">Each piece is handwoven by master artisans preserving centuries of Bengali textile tradition.</p>
+            </div>
+            <div className="text-center space-y-4">
+              <div className="w-20 h-20 bg-olive/10 rounded-full flex items-center justify-center mx-auto">
+                <Award className="text-olive" size={32} />
+              </div>
+              <h3 className="text-xl font-display text-[#2D2D2D]">Authentic Quality</h3>
+              <p className="text-gray-500 text-sm leading-relaxed">Only the finest fabrics sourced directly from heritage weaving communities across Bengal.</p>
+            </div>
+            <div className="text-center space-y-4">
+              <div className="w-20 h-20 bg-[#D4AF37]/10 rounded-full flex items-center justify-center mx-auto">
+                <Heart className="text-[#D4AF37]" size={32} />
+              </div>
+              <h3 className="text-xl font-display text-[#2D2D2D]">Sustainable Fashion</h3>
+              <p className="text-gray-500 text-sm leading-relaxed">Supporting local communities while delivering timeless elegance that respects the environment.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Section 5: Footer */}
+      <div className="h-full flex flex-col justify-end bg-[#1A1A1A]">
+        <Footer />
+      </div>
+    </ZoomScrollContainer>
   );
 }
 

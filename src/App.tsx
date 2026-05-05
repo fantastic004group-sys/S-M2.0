@@ -19,12 +19,34 @@ import { CartProvider } from "./context/CartContext";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import ErrorBoundary from "./components/ui/ErrorBoundary";
-import { MOCK_PRODUCTS } from "./data/products";
 import { Link } from "react-router-dom";
 import { ArrowRight, Sparkles, Award, Heart } from "lucide-react";
 import ZoomPage, { ZoomSection } from "./components/ui/ZoomPage";
+import { useState, useEffect } from "react";
+import { collection, getDocs, query, orderBy, limit } from "firebase/firestore";
+import { db } from "./lib/firebase";
+import { Product } from "./types";
 
 function Home() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchProducts() {
+      try {
+        const q = query(collection(db, "products"), orderBy("createdAt", "desc"), limit(4));
+        const snapshot = await getDocs(q);
+        const items = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as Product[];
+        setProducts(items);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchProducts();
+  }, []);
+
   return (
     <ZoomPage>
       {/* Section 1: Hero */}
@@ -32,32 +54,42 @@ function Home() {
         <Hero />
       </div>
 
-      {/* Section 2: New Arrivals */}
-      <ZoomSection className="bg-natural-bg">
-        <section className="max-w-7xl mx-auto px-4 w-full py-10">
-          <div className="flex flex-col md:flex-row items-baseline justify-between mb-12 gap-4">
-            <div>
-              <h2 className="text-4xl font-display text-[#2F2F2F] mb-2 uppercase tracking-tight">
-                New <span className="italic text-[#8B0000]">Arrivals</span>
-              </h2>
-              <div className="h-1 w-20 bg-[#D4AF37]" />
+      {/* Section 2: New Arrivals (only if products exist in Firestore) */}
+      {(loading || products.length > 0) && (
+        <ZoomSection className="bg-natural-bg">
+          <section className="max-w-7xl mx-auto px-4 w-full py-10">
+            <div className="flex flex-col md:flex-row items-baseline justify-between mb-12 gap-4">
+              <div>
+                <h2 className="text-4xl font-display text-[#2F2F2F] mb-2 uppercase tracking-tight">
+                  New <span className="italic text-[#8B0000]">Arrivals</span>
+                </h2>
+                <div className="h-1 w-20 bg-[#D4AF37]" />
+              </div>
+              <Link
+                to="/products"
+                className="text-xs font-bold uppercase tracking-widest text-[#8B0000] border-b-2 border-[#8B0000] pb-1 hover:text-[#D4AF37] hover:border-[#D4AF37] transition-all flex items-center gap-1"
+              >
+                View All Collection
+                <ArrowRight size={14} />
+              </Link>
             </div>
-            <Link
-              to="/products"
-              className="text-xs font-bold uppercase tracking-widest text-[#8B0000] border-b-2 border-[#8B0000] pb-1 hover:text-[#D4AF37] hover:border-[#D4AF37] transition-all flex items-center gap-1"
-            >
-              View All Collection
-              <ArrowRight size={14} />
-            </Link>
-          </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {MOCK_PRODUCTS.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-        </section>
-      </ZoomSection>
+            {loading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="aspect-[3/4] bg-gray-100 animate-pulse rounded-[2rem]" />
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                {products.map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+              </div>
+            )}
+          </section>
+        </ZoomSection>
+      )}
 
       {/* Section 3: Heritage Banner */}
       <div className="h-full flex items-center bg-[#8B0000] overflow-hidden relative">

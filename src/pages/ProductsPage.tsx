@@ -4,7 +4,6 @@ import { db } from "@/src/lib/firebase";
 import { Product } from "@/src/types";
 import ProductCard from "@/src/components/product/ProductCard";
 import { CATEGORIES } from "@/src/constants";
-import { MOCK_PRODUCTS } from "@/src/data/products";
 import { Search, SlidersHorizontal } from "lucide-react";
 import ZoomPage, { ZoomSection } from "@/src/components/ui/ZoomPage";
 
@@ -21,9 +20,9 @@ export default function ProductsPage() {
         const q = query(collection(db, "products"), orderBy("createdAt", "desc"));
         const snapshot = await getDocs(q);
         const items = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as Product[];
-        setProducts(items.length > 0 ? items : MOCK_PRODUCTS);
-      } catch {
-        setProducts(MOCK_PRODUCTS);
+        setProducts(items);
+      } catch (error) {
+        console.error("Error fetching products:", error);
       } finally {
         setLoading(false);
       }

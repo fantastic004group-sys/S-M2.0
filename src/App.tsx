@@ -20,19 +20,18 @@ import ErrorBoundary from "./components/ui/ErrorBoundary";
 import { MOCK_PRODUCTS } from "./data/products";
 import { Link } from "react-router-dom";
 import { ArrowRight, Sparkles, Award, Heart } from "lucide-react";
-import ZoomScrollContainer from "./components/ui/ZoomScrollContainer";
-import Footer from "./components/layout/Footer";
+import ZoomPage, { ZoomSection } from "./components/ui/ZoomPage";
 
 function Home() {
   return (
-    <ZoomScrollContainer>
+    <ZoomPage>
       {/* Section 1: Hero */}
       <div className="h-full">
         <Hero />
       </div>
 
       {/* Section 2: New Arrivals */}
-      <div className="h-full flex items-center bg-natural-bg">
+      <ZoomSection className="bg-natural-bg">
         <section className="max-w-7xl mx-auto px-4 w-full py-10">
           <div className="flex flex-col md:flex-row items-baseline justify-between mb-12 gap-4">
             <div>
@@ -56,7 +55,7 @@ function Home() {
             ))}
           </div>
         </section>
-      </div>
+      </ZoomSection>
 
       {/* Section 3: Heritage Banner */}
       <div className="h-full flex items-center bg-[#8B0000] overflow-hidden relative">
@@ -84,15 +83,13 @@ function Home() {
              />
           </div>
         </div>
-        
-        {/* Pattern Background */}
         <div className="absolute top-0 right-0 w-full h-full opacity-10 pointer-events-none">
            <div className="absolute top-10 right-10 text-white font-display text-[15rem] leading-none select-none">{'\u0993'}</div>
         </div>
       </div>
 
       {/* Section 4: Why Choose Us */}
-      <div className="h-full flex items-center bg-natural-bg">
+      <ZoomSection className="bg-natural-bg">
         <div className="max-w-7xl mx-auto px-4 w-full">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-display text-[#2F2F2F] mb-4 uppercase tracking-tight">
@@ -124,13 +121,8 @@ function Home() {
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Section 5: Footer */}
-      <div className="h-full flex flex-col justify-end bg-[#1A1A1A]">
-        <Footer />
-      </div>
-    </ZoomScrollContainer>
+      </ZoomSection>
+    </ZoomPage>
   );
 }
 

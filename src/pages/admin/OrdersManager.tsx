@@ -119,8 +119,38 @@ export default function OrdersManager() {
                   <span className="text-crimson">&#2547; {selectedOrder.totalAmount.toLocaleString()}</span>
                 </div>
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Shipping Address</p>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Shipping Details</p>
                   <p className="text-sm text-gray-700">{selectedOrder.shippingAddress}</p>
+                  <p className="text-sm font-semibold text-[#2D2D2D] mt-1">Phone: {selectedOrder.phone}</p>
+                  {selectedOrder.notes && (
+                    <p className="text-xs text-gray-500 italic mt-1">Note: {selectedOrder.notes}</p>
+                  )}
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Payment Information</p>
+                  <div className={`inline-block px-3 py-1 rounded-full text-[10px] font-bold uppercase ${
+                    selectedOrder.paymentMethod === "bkash" ? "bg-crimson/10 text-crimson" : "bg-gray-100 text-gray-600"
+                  }`}>
+                    {selectedOrder.paymentMethod === "bkash" ? "bKash Online" : "Cash on Delivery"}
+                  </div>
+                  {selectedOrder.paymentMethod === "bkash" && selectedOrder.transactionId && (
+                    <p className="text-sm font-mono font-bold text-gray-700 mt-2 flex items-center gap-2">
+                       TrxID: <span className="bg-gray-100 px-2 py-0.5 rounded">{selectedOrder.transactionId}</span>
+                    </p>
+                  )}
+                  <div className="mt-2 space-y-1">
+                    <p className="text-xs text-gray-500 flex justify-between">
+                      Subtotal: <span>&#2547; {selectedOrder.subtotal?.toLocaleString() || (selectedOrder.totalAmount - (selectedOrder.deliveryCharge || 100)).toLocaleString()}</span>
+                    </p>
+                    <p className="text-xs text-gray-500 flex justify-between">
+                      Delivery: <span>&#2547; {selectedOrder.deliveryCharge?.toLocaleString() || "100"}</span>
+                    </p>
+                    {selectedOrder.bkashCharge && (
+                      <p className="text-xs text-gray-500 flex justify-between">
+                        bKash Fee (2%): <span>&#2547; {selectedOrder.bkashCharge.toLocaleString()}</span>
+                      </p>
+                    )}
+                  </div>
                 </div>
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Update Status</p>

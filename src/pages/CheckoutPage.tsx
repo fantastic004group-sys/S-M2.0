@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "@/src/context/CartContext";
 import { useAuth } from "@/src/context/AuthContext";
@@ -7,6 +7,7 @@ import { db } from "@/src/lib/firebase";
 import { OrderStatus } from "@/src/types";
 import { ChevronRight, CheckCircle, Lock } from "lucide-react";
 import ZoomPage, { ZoomSection } from "@/src/components/ui/ZoomPage";
+import { motion } from "motion/react";
 
 export default function CheckoutPage() {
   const { cart, totalPrice, totalItems, clearCart } = useCart();
@@ -15,6 +16,8 @@ export default function CheckoutPage() {
   const [shippingAddress, setShippingAddress] = useState("");
   const [phone, setPhone] = useState("");
   const [notes, setNotes] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState<"cod" | "bkash">("cod");
+  const [transactionId, setTransactionId] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [orderId, setOrderId] = useState("");
@@ -65,13 +68,26 @@ export default function CheckoutPage() {
       return;
     }
     if (!shippingAddress.trim()) return;
+    if (paymentMethod === "bkash" && !transactionId.trim()) {
+      alert("Please provide the bKash Transaction ID.");
+      return;
+    }
 
     setSubmitting(true);
+    const deliveryCharge = 100; // Flat delivery charge as requested
+    const bkashCharge = paymentMethod === "bkash" ? totalPrice * 0.02 : 0;
+    const finalAmount = totalPrice + deliveryCharge + bkashCharge;
+
     try {
       const order = {
         userId: user.uid,
         items: cart,
-        totalAmount: totalPrice,
+        totalAmount: finalAmount,
+        subtotal: totalPrice,
+        deliveryCharge,
+        bkashCharge,
+        paymentMethod,
+        transactionId: paymentMethod === "bkash" ? transactionId : null,
         status: OrderStatus.PLACED,
         shippingAddress: shippingAddress.trim(),
         phone: phone.trim(),
@@ -152,9 +168,69 @@ export default function CheckoutPage() {
                   />
                 </div>
 
-                <div className="p-4 bg-white rounded-xl text-sm text-gray-600 border border-warm-border">
-                  <p className="font-semibold text-[#2D2D2D] mb-1">Payment: Cash on Delivery</p>
-                  <p>Pay when your order is delivered to your doorstep.</p>
+                <div className="space-y-4">
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 block mb-2">Payment Method *</label>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMethod("cod")}
+                      className={`p-4 rounded-xl border-2 text-left transition-all ${
+                        paymentMethod === "cod" ? "border-crimson bg-crimson/5" : "border-warm-border hover:border-gray-300"
+                      }`}
+                    >
+                      <p className="font-bold text-[#2D2D2D]">Cash on Delivery</p>
+                      <p className="text-xs text-gray-500">Regular delivery charges apply.</p>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMethod("bkash")}
+                      className={`p-4 rounded-xl border-2 text-left transition-all ${
+                        paymentMethod === "bkash" ? "border-crimson bg-crimson/5" : "border-warm-border hover:border-gray-300"
+                      }`}
+                    >
+                      <p className="font-bold text-[#2D2D2D]">bKash (Online Payment)</p>
+                      <p className="text-xs text-gray-500">2% cashout charge + Delivery.</p>
+                    </button>
+                  </div>
+
+                  {paymentMethod === "bkash" && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      className="p-6 bg-white border border-warm-border rounded-2xl space-y-4"
+                    >
+                      <div className="flex items-center gap-3 text-crimson mb-2">
+                        <div className="w-10 h-10 bg-crimson/10 rounded-full flex items-center justify-center font-bold">৳</div>
+                        <div>
+                          <p className="text-xs font-bold uppercase tracking-widest">Instruction</p>
+                          <p className="text-sm font-semibold">Send Money to: 01686235328</p>
+                        </div>
+                      </div>
+                      <p className="text-xs text-gray-500 leading-relaxed">
+                        Please use "Send Money" to the above number. Ensure you include the 2% cashout charge in your payment. Provide the Transaction ID (TrxID) below for verification.
+                      </p>
+                      <div>
+                        <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 block mb-1">Transaction ID (TrxID) *</label>
+                        <input
+                          type="text"
+                          value={transactionId}
+                          onChange={(e) => setTransactionId(e.target.value)}
+                          required={paymentMethod === "bkash"}
+                          placeholder="8X7Y6Z..."
+                          className="w-full px-5 py-3 border border-warm-border rounded-xl focus:ring-1 focus:ring-olive transition-all outline-none uppercase"
+                        />
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {paymentMethod === "cod" && (
+                    <div className="p-4 bg-white rounded-xl text-sm text-gray-600 border border-warm-border">
+                      <p className="font-semibold text-[#2D2D2D] mb-1">Cash on Delivery Info</p>
+                      <p>Pay when your order is delivered to your doorstep.</p>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -178,12 +254,18 @@ export default function CheckoutPage() {
                     </div>
                     <div className="flex justify-between text-gray-600 text-sm">
                       <span>Shipping</span>
-                      <span className="text-olive font-bold uppercase text-[10px] tracking-widest">Free</span>
+                      <span>&#2547; 100</span>
                     </div>
+                    {paymentMethod === "bkash" && (
+                      <div className="flex justify-between text-gray-600 text-sm">
+                        <span>bKash Charge (2%)</span>
+                        <span>&#2547; {(totalPrice * 0.02).toLocaleString()}</span>
+                      </div>
+                    )}
                     <div className="h-px bg-warm-border" />
                     <div className="flex justify-between text-[#2D2D2D] font-bold text-xl">
                       <span>Total</span>
-                      <span>&#2547; {totalPrice.toLocaleString()}</span>
+                      <span>&#2547; {(totalPrice + 100 + (paymentMethod === "bkash" ? totalPrice * 0.02 : 0)).toLocaleString()}</span>
                     </div>
                   </div>
 
@@ -196,7 +278,9 @@ export default function CheckoutPage() {
                     {submitting ? "Placing Order..." : "Place Order"}
                   </button>
 
-                  <p className="text-[10px] text-center text-gray-500 uppercase tracking-widest mt-4">Cash on Delivery</p>
+                  <p className="text-[10px] text-center text-gray-500 uppercase tracking-widest mt-4">
+                    {paymentMethod === "cod" ? "Cash on Delivery" : "bKash Online Payment"}
+                  </p>
                 </div>
               </div>
             </div>

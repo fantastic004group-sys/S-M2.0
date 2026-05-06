@@ -25,8 +25,15 @@ export interface Order {
   userId: string;
   items: CartItem[];
   totalAmount: number;
+  subtotal: number;
+  deliveryCharge: number;
+  bkashCharge?: number;
+  paymentMethod: "cod" | "bkash";
+  transactionId?: string | null;
   status: OrderStatus;
   shippingAddress: string;
+  phone: string;
+  notes?: string;
   createdAt: number;
   updatedAt: number;
 }

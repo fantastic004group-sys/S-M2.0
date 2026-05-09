@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "@/src/context/CartContext";
 import { useAuth } from "@/src/context/AuthContext";
-import { collection, addDoc } from "firebase/firestore";
+import { collection, doc, writeBatch, increment } from "firebase/firestore";
 import { db } from "@/src/lib/firebase";
 import { OrderStatus } from "@/src/types";
 import { ChevronRight, CheckCircle, Lock } from "lucide-react";
@@ -95,8 +95,24 @@ export default function CheckoutPage() {
         createdAt: Date.now(),
         updatedAt: Date.now(),
       };
-      const docRef = await addDoc(collection(db, "orders"), order);
-      setOrderId(docRef.id);
+
+      const batch = writeBatch(db);
+      const orderRef = doc(collection(db, "orders"));
+      
+      // Save order
+      batch.set(orderRef, order);
+
+      // Update product stock
+      cart.forEach((item) => {
+        const productRef = doc(db, "products", item.id);
+        batch.update(productRef, {
+          stock: increment(-item.quantity)
+        });
+      });
+
+      await batch.commit();
+      
+      setOrderId(orderRef.id);
       clearCart();
       setOrderPlaced(true);
     } catch (error) {

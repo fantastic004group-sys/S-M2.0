@@ -1,6 +1,6 @@
 import React from "react";
 import AdminSidebar from "@/src/components/admin/AdminSidebar";
-import { collection, getDocs, query, orderBy, updateDoc, doc } from "firebase/firestore";
+import { collection, getDocs, query, orderBy, updateDoc, doc, writeBatch, increment } from "firebase/firestore";
 import { db } from "@/src/lib/firebase";
 import { Order, OrderStatus } from "@/src/types";
 import { Package, Clock, Truck, CheckCircle, XCircle, Eye } from "lucide-react";
@@ -39,10 +39,49 @@ export default function OrdersManager() {
   const handleStatusUpdate = async (orderId: string, newStatus: OrderStatus) => {
     setUpdating(orderId);
     try {
-      await updateDoc(doc(db, "orders", orderId), {
-        status: newStatus,
-        updatedAt: Date.now(),
-      });
+      const orderToUpdate = orders.find(o => o.id === orderId);
+      if (!orderToUpdate) return;
+
+      const oldStatus = orderToUpdate.status;
+
+      // Only perform stock updates if moving to or from CANCELLED status
+      if (newStatus === OrderStatus.CANCELLED && oldStatus !== OrderStatus.CANCELLED) {
+        const batch = writeBatch(db);
+        // Update order status
+        batch.update(doc(db, "orders", orderId), {
+          status: newStatus,
+          updatedAt: Date.now(),
+        });
+        // Restore stock
+        orderToUpdate.items.forEach(item => {
+          const productRef = doc(db, "products", item.id);
+          batch.update(productRef, {
+            stock: increment(item.quantity)
+          });
+        });
+        await batch.commit();
+      } else if (oldStatus === OrderStatus.CANCELLED && newStatus !== OrderStatus.CANCELLED) {
+        // Reduct stock again if un-cancelling
+        const batch = writeBatch(db);
+        batch.update(doc(db, "orders", orderId), {
+          status: newStatus,
+          updatedAt: Date.now(),
+        });
+        orderToUpdate.items.forEach(item => {
+          const productRef = doc(db, "products", item.id);
+          batch.update(productRef, {
+            stock: increment(-item.quantity)
+          });
+        });
+        await batch.commit();
+      } else {
+        // Normal status update without stock implications
+        await updateDoc(doc(db, "orders", orderId), {
+          status: newStatus,
+          updatedAt: Date.now(),
+        });
+      }
+
       setOrders(prev =>
         prev.map(o => (o.id === orderId ? { ...o, status: newStatus, updatedAt: Date.now() } : o))
       );

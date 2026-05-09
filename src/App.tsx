@@ -111,7 +111,7 @@ function Home() {
           <div className="flex-1 relative group">
              <div className="absolute -inset-4 border border-[#D4AF37]/30 scale-95 group-hover:scale-100 transition-transform duration-700" />
              <img 
-               src="https://images.unsplash.com/photo-1582533561751-983d31d046fe?q=80&w=1200" 
+               src="https://images.unsplash.com/photo-1582533561751-https://cdn.shopify.com/s/files/1/0589/1322/6961/articles/Pure_Cotton_Sky_Blue_Pakistani_Salwar_Kameez_With_Digital_Printed_Dupatta-3.webp?v=1725975373983d31d046fe?q=80&w=1200" 
                alt="Craftsmanship" 
                className="w-full relative z-10 grayscale hover:grayscale-0 transition-all duration-1000"
              />

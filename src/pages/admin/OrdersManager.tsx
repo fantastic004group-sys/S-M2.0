@@ -44,46 +44,68 @@ export default function OrdersManager() {
 
       const oldStatus = orderToUpdate.status;
 
-      // Only perform stock updates if moving to or from CANCELLED status
-      if (newStatus === OrderStatus.CANCELLED && oldStatus !== OrderStatus.CANCELLED) {
-        const batch = writeBatch(db);
-        // Update order status
-        batch.update(doc(db, "orders", orderId), {
-          status: newStatus,
-          updatedAt: Date.now(),
-        });
-        // Restore stock
+      // Stock Management Logic
+      const batch = writeBatch(db);
+      let needsBatch = false;
+
+      // Case 1: Cancelling an order that ALREADY HAD stock deducted -> Restore stock
+      if (newStatus === OrderStatus.CANCELLED && oldStatus !== OrderStatus.CANCELLED && orderToUpdate.isStockDeducted) {
         orderToUpdate.items.forEach(item => {
           const productRef = doc(db, "products", item.id);
-          batch.update(productRef, {
-            stock: increment(item.quantity)
-          });
+          batch.update(productRef, { stock: increment(item.quantity) });
         });
-        await batch.commit();
-      } else if (oldStatus === OrderStatus.CANCELLED && newStatus !== OrderStatus.CANCELLED) {
-        // Reduct stock again if un-cancelling
-        const batch = writeBatch(db);
-        batch.update(doc(db, "orders", orderId), {
-          status: newStatus,
-          updatedAt: Date.now(),
+        batch.update(doc(db, "orders", orderId), { 
+          status: newStatus, 
+          isStockDeducted: false,
+          updatedAt: Date.now() 
         });
+        needsBatch = true;
+      } 
+      // Case 2: Un-cancelling an order -> Re-deduct stock
+      else if (oldStatus === OrderStatus.CANCELLED && newStatus !== OrderStatus.CANCELLED) {
         orderToUpdate.items.forEach(item => {
           const productRef = doc(db, "products", item.id);
-          batch.update(productRef, {
-            stock: increment(-item.quantity)
-          });
+          batch.update(productRef, { stock: increment(-item.quantity) });
         });
-        await batch.commit();
-      } else {
-        // Normal status update without stock implications
+        batch.update(doc(db, "orders", orderId), { 
+          status: newStatus, 
+          isStockDeducted: true,
+          updatedAt: Date.now() 
+        });
+        needsBatch = true;
+      }
+      // Case 3: Moving to Shipped/Delivered and stock WAS NOT deducted yet (legacy orders or manual sync)
+      else if ((newStatus === OrderStatus.SHIPPED || newStatus === OrderStatus.DELIVERED) && !orderToUpdate.isStockDeducted) {
+        orderToUpdate.items.forEach(item => {
+          const productRef = doc(db, "products", item.id);
+          batch.update(productRef, { stock: increment(-item.quantity) });
+        });
+        batch.update(doc(db, "orders", orderId), { 
+          status: newStatus, 
+          isStockDeducted: true,
+          updatedAt: Date.now() 
+        });
+        needsBatch = true;
+      }
+      // Default: Just update status
+      else {
         await updateDoc(doc(db, "orders", orderId), {
           status: newStatus,
           updatedAt: Date.now(),
         });
       }
 
+      if (needsBatch) {
+        await batch.commit();
+      }
+
       setOrders(prev =>
-        prev.map(o => (o.id === orderId ? { ...o, status: newStatus, updatedAt: Date.now() } : o))
+        prev.map(o => (o.id === orderId ? { 
+          ...o, 
+          status: newStatus, 
+          isStockDeducted: (newStatus === OrderStatus.CANCELLED ? false : (o.isStockDeducted || needsBatch)),
+          updatedAt: Date.now() 
+        } : o))
       );
     } catch (error) {
       console.error("Error updating order:", error);
@@ -190,6 +212,22 @@ export default function OrdersManager() {
                       </p>
                     )}
                   </div>
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Stock Tracking</p>
+                  <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase ${
+                    selectedOrder.isStockDeducted ? "bg-green-50 text-green-600" : "bg-amber-50 text-amber-600"
+                  }`}>
+                    {selectedOrder.isStockDeducted ? "Stock Deducted" : "Stock Pending"}
+                  </div>
+                  {!selectedOrder.isStockDeducted && selectedOrder.status !== OrderStatus.CANCELLED && (
+                    <button
+                      onClick={() => handleStatusUpdate(selectedOrder.id, selectedOrder.status)}
+                      className="ml-3 text-[10px] font-bold text-crimson hover:underline uppercase"
+                    >
+                      Deduct Now
+                    </button>
+                  )}
                 </div>
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Update Status</p>

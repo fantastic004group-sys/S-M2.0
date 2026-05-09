@@ -92,6 +92,7 @@ export default function CheckoutPage() {
         shippingAddress: shippingAddress.trim(),
         phone: phone.trim(),
         notes: notes.trim(),
+        isStockDeducted: true,
         createdAt: Date.now(),
         updatedAt: Date.now(),
       };

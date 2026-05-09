@@ -34,6 +34,7 @@ export interface Order {
   shippingAddress: string;
   phone: string;
   notes?: string;
+  isStockDeducted?: boolean;
   createdAt: number;
   updatedAt: number;
 }

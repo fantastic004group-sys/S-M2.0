@@ -111,7 +111,7 @@ function Home() {
           <div className="flex-1 relative group">
              <div className="absolute -inset-4 border border-[#D4AF37]/30 scale-95 group-hover:scale-100 transition-transform duration-700" />
              <img 
-               src="https://images.unsplash.com/photo-1621335829175-95f437384d7c?q=80&w=1000" 
+               src="https://images.unsplash.com/photo-1582533561751-983d31d046fe?q=80&w=1200" 
                alt="Craftsmanship" 
                className="w-full relative z-10 grayscale hover:grayscale-0 transition-all duration-1000"
              />

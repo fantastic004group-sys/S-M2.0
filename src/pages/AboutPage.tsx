@@ -21,7 +21,62 @@ export default function AboutPage() {
         </div>
       </ZoomSection>
 
-      {/* Section 2: Values */}
+      {/* Section 2: Heritage Gallery */}
+      <ZoomSection className="bg-white">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center mb-24">
+            <div className="relative group overflow-hidden rounded-[2.5rem] shadow-2xl">
+              <img 
+                src="https://images.unsplash.com/photo-1544441892-794166f473e5?q=80&w=1200" 
+                alt="Finest Fabrics" 
+                className="w-full aspect-square object-cover group-hover:scale-105 transition-transform duration-1000"
+              />
+              <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors" />
+            </div>
+            <div className="space-y-6 md:pl-12">
+              <h2 className="text-4xl font-display text-[#2D2D2D]">The Art of <span className="italic text-crimson">Weaving</span></h2>
+              <p className="text-gray-600 leading-relaxed">
+                Bengal's weaving heritage dates back centuries, with techniques like Jamdani and Muslin once prized by royalty across the globe. At S&M Wardrobe, we are dedicated to keeping these intricate arts alive, ensuring that every thread carries the legacy of our ancestors.
+              </p>
+              <div className="flex gap-4">
+                 <div className="w-1/2 p-4 bg-natural-bg rounded-2xl border border-warm-border">
+                    <p className="text-2xl font-display text-crimson mb-1">100%</p>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Handcrafted</p>
+                 </div>
+                 <div className="w-1/2 p-4 bg-natural-bg rounded-2xl border border-warm-border">
+                    <p className="text-2xl font-display text-olive mb-1">50+</p>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Artisan Families</p>
+                 </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center flex-row-reverse">
+            <div className="md:order-2 relative group overflow-hidden rounded-[2.5rem] shadow-2xl">
+              <img 
+                src="https://images.unsplash.com/photo-1620803525281-af87265a7e6d?q=80&w=1200" 
+                alt="Contemporary Boutique" 
+                className="w-full aspect-square object-cover group-hover:scale-105 transition-transform duration-1000"
+              />
+              <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors" />
+            </div>
+            <div className="md:order-1 space-y-6 md:pr-12">
+              <h2 className="text-4xl font-display text-[#2D2D2D]">Modern <span className="italic text-olive">Silhouette</span></h2>
+              <p className="text-gray-600 leading-relaxed">
+                While we honor tradition, we also embrace the evolving identity of the modern woman. Our collection features a blend of classic heritage pieces and contemporary fusion wear, designed to empower grace and confidence in every setting.
+              </p>
+              <Link 
+                to="/products"
+                className="inline-flex items-center gap-2 text-crimson font-bold uppercase tracking-widest text-xs border-b-2 border-crimson pb-1 hover:text-olive hover:border-olive transition-all"
+              >
+                Discover the Collection
+              </Link>
+            </div>
+          </div>
+        </div>
+      </ZoomSection>
+
+      {/* Section 3: Values */}
       <ZoomSection className="bg-white">
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12">

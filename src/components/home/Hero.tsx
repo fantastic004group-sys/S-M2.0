@@ -9,7 +9,7 @@ export default function Hero() {
       <div className="absolute inset-0">
         <div className="absolute inset-0 bg-[#5a5a40]/10 z-10" />
         <img
-          src="https://images.unsplash.com/photo-1583391733956-6c78276477e2?q=80&w=2000"
+          src="https://5.imimg.com/data5/TU/RA/MY-10522266/lt-fabrics-nitya-salwar-kameez.jpeg"
           alt="Bengali Boutique"
           className="w-full h-full object-cover object-center scale-105"
         />

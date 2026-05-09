@@ -27,7 +27,7 @@ export default function AboutPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center mb-24">
             <div className="relative group overflow-hidden rounded-[2.5rem] shadow-2xl">
               <img 
-                src="https://images.unsplash.com/photo-1544441892-794166f473e5?q=80&w=1200" 
+                src="https://cdn.shopify.com/s/files/1/0589/1322/6961/articles/Pure_Cotton_Sky_Blue_Pakistani_Salwar_Kameez_With_Digital_Printed_Dupatta-3.webp?v=1725975373" 
                 alt="Finest Fabrics" 
                 className="w-full aspect-square object-cover group-hover:scale-105 transition-transform duration-1000"
               />
@@ -54,7 +54,7 @@ export default function AboutPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center flex-row-reverse">
             <div className="md:order-2 relative group overflow-hidden rounded-[2.5rem] shadow-2xl">
               <img 
-                src="https://images.unsplash.com/photo-1620803525281-af87265a7e6d?q=80&w=1200" 
+                src="hhttps://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQpcG3lp4Fgf1p6rkg2HUGLRJSIPMKcRS7JQg&s" 
                 alt="Contemporary Boutique" 
                 className="w-full aspect-square object-cover group-hover:scale-105 transition-transform duration-1000"
               />

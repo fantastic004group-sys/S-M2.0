@@ -156,6 +156,54 @@ function Home() {
           </div>
         </div>
       </ZoomSection>
+
+      {/* Section 5: FAQ */}
+      <ZoomSection className="bg-white">
+        <div className="max-w-4xl mx-auto px-4 w-full">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-display text-[#2F2F2F] mb-4 uppercase tracking-tight">
+              Common <span className="italic text-[#8B0000]">Questions</span>
+            </h2>
+            <div className="h-1 w-20 bg-[#D4AF37] mx-auto" />
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {[
+              {
+                q: "Are the products authentic handloom?",
+                a: "Absolutely. Every piece is sourced directly from artisan communities in Bengal. we guarantee the authenticity of our weaves."
+              },
+              {
+                q: "What is your delivery timeline?",
+                a: "Dhaka deliveries take 2-3 business days. Outside Dhaka takes 5-7 days via heritage-secure shipping."
+              },
+              {
+                q: "Do you offer Cash on Delivery?",
+                a: "Yes, we offer both Cash on Delivery and secure bKash online payments for your convenience."
+              },
+              {
+                q: "Can I return an item?",
+                a: "We have a 7-day easy return policy for unused items in their original packaging. Your satisfaction is our priority."
+              }
+            ].map((faq, idx) => (
+              <div key={idx} className="p-8 bg-natural-bg/30 border border-warm-border rounded-[2rem] hover:shadow-md transition-all">
+                <h3 className="font-display text-lg text-[#2D2D2D] mb-3 flex items-start gap-2">
+                  <span className="text-crimson italic">Q.</span> {faq.q}
+                </h3>
+                <p className="text-gray-500 text-sm leading-relaxed font-light">
+                  {faq.a}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          <div className="text-center mt-12">
+            <Link to="/faq" className="text-xs font-bold uppercase tracking-widest text-crimson border-b border-crimson pb-1 hover:text-olive hover:border-olive transition-all">
+              View All FAQs
+            </Link>
+          </div>
+        </div>
+      </ZoomSection>
     </ZoomPage>
   );
 }

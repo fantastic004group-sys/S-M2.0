@@ -56,6 +56,14 @@ export interface Review {
   createdAt: number;
 }
 
+export interface PageView {
+  id: string;
+  path: string;
+  timestamp: any;
+  userId: string;
+  sessionId: string;
+}
+
 export interface User {
   uid: string;
   email: string;

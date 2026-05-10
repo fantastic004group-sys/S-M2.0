@@ -2,18 +2,20 @@ import React, { useEffect, useState } from "react";
 import AdminSidebar from "@/src/components/admin/AdminSidebar";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { TrendingUp, ShoppingBag, Users, DollarSign, Package, AlertCircle, Loader2 } from "lucide-react";
-import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
+import { collection, onSnapshot, query, orderBy, limit } from "firebase/firestore";
 import { db } from "@/src/lib/firebase";
-import { Order, OrderStatus, Product } from "@/src/types";
+import { Order, OrderStatus, Product, PageView } from "@/src/types";
 
 export default function AdminDashboard() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
+  const [pageViewsCount, setPageViewsCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const ordersQuery = query(collection(db, "orders"), orderBy("createdAt", "desc"));
     const productsQuery = query(collection(db, "products"));
+    const viewsQuery = query(collection(db, "page_views"), limit(1000)); // Just for a count preview
 
     const unsubscribeOrders = onSnapshot(ordersQuery, (snapshot) => {
       const ordersData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Order));
@@ -26,9 +28,16 @@ export default function AdminDashboard() {
       setProducts(productsData);
     });
 
+    const unsubscribeViews = onSnapshot(viewsQuery, (snapshot) => {
+      // For the dashboard preview, we just need a count
+      // In a real app we might use a dedicated counter document
+      setPageViewsCount(snapshot.size);
+    });
+
     return () => {
       unsubscribeOrders();
       unsubscribeProducts();
+      unsubscribeViews();
     };
   }, []);
 
@@ -70,9 +79,9 @@ export default function AdminDashboard() {
 
   const stats = [
     { label: "Total Revenue", value: `৳ ${totalRevenue.toLocaleString()}`, icon: DollarSign, color: "bg-blue-500" },
-    { label: "Total Orders", value: totalOrders.toString(), icon: ShoppingBag, color: "bg-purple-500" },
     { label: "Active Customers", value: activeCustomers.toString(), icon: Users, color: "bg-green-500" },
     { label: "Pending Shipments", value: pendingShipments.toString(), icon: Package, color: "bg-orange-500" },
+    { label: "Page Views", value: pageViewsCount.toLocaleString(), icon: TrendingUp, color: "bg-crimson" },
   ];
 
   return (

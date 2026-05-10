@@ -19,6 +19,7 @@ import { CartProvider } from "./context/CartContext";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import ErrorBoundary from "./components/ui/ErrorBoundary";
+import AnalyticsTracker from "./components/analytics/AnalyticsTracker";
 import { Link } from "react-router-dom";
 import { ArrowRight, Sparkles, Award, Heart } from "lucide-react";
 import ZoomPage, { ZoomSection } from "./components/ui/ZoomPage";
@@ -214,6 +215,7 @@ export default function App() {
       <AuthProvider>
         <CartProvider>
           <Router>
+            <AnalyticsTracker />
             <Routes>
               <Route path="/" element={<Layout />}>
                 <Route index element={<Home />} />

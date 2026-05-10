@@ -89,6 +89,11 @@ export default function CartPage() {
                           <Plus size={16} />
                         </button>
                       </div>
+                      {item.quantity >= item.stock && (
+                        <p className="text-[10px] text-crimson font-bold uppercase tracking-wider">
+                          Max reached ({item.stock} in stock)
+                        </p>
+                      )}
                     </div>
                   </div>
                 </motion.div>

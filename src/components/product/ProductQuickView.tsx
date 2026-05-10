@@ -18,9 +18,7 @@ export default function ProductQuickView({ product, isOpen, onClose }: ProductQu
   if (!product) return null;
 
   const handleAddToCart = () => {
-    for (let i = 0; i < quantity; i++) {
-      addToCart(product);
-    }
+    addToCart(product, quantity);
     setQuantity(1);
     onClose();
   };

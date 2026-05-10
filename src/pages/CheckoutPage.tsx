@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "@/src/context/CartContext";
 import { useAuth } from "@/src/context/AuthContext";
-import { collection, doc, writeBatch, increment } from "firebase/firestore";
+import { collection, doc, writeBatch, increment, getDoc } from "firebase/firestore";
 import { db } from "@/src/lib/firebase";
 import { OrderStatus } from "@/src/types";
 import { ChevronRight, CheckCircle, Lock } from "lucide-react";
@@ -74,11 +74,27 @@ export default function CheckoutPage() {
     }
 
     setSubmitting(true);
-    const deliveryCharge = 100; // Flat delivery charge as requested
-    const bkashCharge = paymentMethod === "bkash" ? totalPrice * 0.02 : 0;
-    const finalAmount = totalPrice + deliveryCharge + bkashCharge;
-
+    
     try {
+      // Final stock check before placing order
+      const stockCheckPromises = cart.map(item => getDoc(doc(db, "products", item.id)));
+      const stockSnaps = await Promise.all(stockCheckPromises);
+      
+      for (let i = 0; i < stockSnaps.length; i++) {
+        const snap = stockSnaps[i];
+        const cartItem = cart[i];
+        if (snap.exists()) {
+          const currentStock = snap.data().stock;
+          if (currentStock < cartItem.quantity) {
+             throw new Error(`Sorry, "${cartItem.name}" is no longer available in the requested quantity. Available: ${currentStock}`);
+          }
+        }
+      }
+
+      const deliveryCharge = 100; // Flat delivery charge as requested
+      const bkashCharge = paymentMethod === "bkash" ? totalPrice * 0.02 : 0;
+      const finalAmount = totalPrice + deliveryCharge + bkashCharge;
+
       const order = {
         userId: user.uid,
         items: cart,

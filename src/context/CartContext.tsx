@@ -3,7 +3,7 @@ import { CartItem, Product } from "@/src/types";
 
 interface CartContextType {
   cart: CartItem[];
-  addToCart: (product: Product) => void;
+  addToCart: (product: Product, quantity?: number) => void;
   removeFromCart: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
@@ -23,15 +23,29 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem("cart", JSON.stringify(cart));
   }, [cart]);
 
-  const addToCart = (product: Product) => {
+  const addToCart = (product: Product, quantity: number = 1) => {
     setCart((prev) => {
       const existing = prev.find((item) => item.id === product.id);
+      const currentQty = existing ? existing.quantity : 0;
+      const newTotalQty = currentQty + quantity;
+
+      if (newTotalQty > product.stock) {
+        alert(`Limited stock! Only ${product.stock} items available. You already have ${currentQty} in bag.`);
+        return prev;
+      }
+
       if (existing) {
         return prev.map((item) =>
-          item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
+          item.id === product.id ? { ...item, quantity: newTotalQty } : item
         );
       }
-      return [...prev, { ...product as CartItem, quantity: 1 }];
+
+      if (product.stock < quantity) {
+        alert("This item is currently out of stock or has limited quantity.");
+        return prev;
+      }
+
+      return [...prev, { ...product as CartItem, quantity }];
     });
   };
 
@@ -42,7 +56,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const updateQuantity = (productId: string, quantity: number) => {
     if (quantity < 1) return;
     setCart((prev) =>
-      prev.map((item) => (item.id === productId ? { ...item, quantity } : item))
+      prev.map((item) => {
+        if (item.id === productId) {
+          if (quantity > item.stock) {
+            alert(`Limited stock! Only ${item.stock} items available.`);
+            return item;
+          }
+          return { ...item, quantity };
+        }
+        return item;
+      })
     );
   };
 

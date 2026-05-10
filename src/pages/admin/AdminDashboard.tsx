@@ -1,19 +1,80 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import AdminSidebar from "@/src/components/admin/AdminSidebar";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { TrendingUp, ShoppingBag, Users, DollarSign, Package, AlertCircle } from "lucide-react";
-
-const MOCK_SALES_DATA = [
-  { name: "Mon", sales: 4000 },
-  { name: "Tue", sales: 3000 },
-  { name: "Wed", sales: 2000 },
-  { name: "Thu", sales: 2780 },
-  { name: "Fri", sales: 1890 },
-  { name: "Sat", sales: 6390 },
-  { name: "Sun", sales: 9490 },
-];
+import { TrendingUp, ShoppingBag, Users, DollarSign, Package, AlertCircle, Loader2 } from "lucide-react";
+import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
+import { db } from "@/src/lib/firebase";
+import { Order, OrderStatus, Product } from "@/src/types";
 
 export default function AdminDashboard() {
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const ordersQuery = query(collection(db, "orders"), orderBy("createdAt", "desc"));
+    const productsQuery = query(collection(db, "products"));
+
+    const unsubscribeOrders = onSnapshot(ordersQuery, (snapshot) => {
+      const ordersData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Order));
+      setOrders(ordersData);
+      setLoading(false);
+    });
+
+    const unsubscribeProducts = onSnapshot(productsQuery, (snapshot) => {
+      const productsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+      setProducts(productsData);
+    });
+
+    return () => {
+      unsubscribeOrders();
+      unsubscribeProducts();
+    };
+  }, []);
+
+  const totalRevenue = orders
+    .filter(o => o.status !== OrderStatus.CANCELLED)
+    .reduce((sum, o) => sum + o.totalAmount, 0);
+
+  const totalOrders = orders.length;
+  const activeCustomers = new Set(orders.map(o => o.userId)).size;
+  const pendingShipments = orders.filter(o => o.status === OrderStatus.PLACED).length;
+
+  // Process sales data for chart (last 7 days)
+  const last7Days = [...Array(7)].map((_, i) => {
+    const date = new Date();
+    date.setDate(date.getDate() - (6 - i));
+    const dayName = date.toLocaleDateString("en-US", { weekday: "short" });
+    const dayRevenue = orders
+      .filter(o => {
+        const orderDate = new Date(o.createdAt);
+        return orderDate.toDateString() === date.toDateString() && o.status !== OrderStatus.CANCELLED;
+      })
+      .reduce((sum, o) => sum + o.totalAmount, 0);
+    return { name: dayName, sales: dayRevenue };
+  });
+
+  const lowStockProducts = products.filter(p => p.stock <= 5);
+  const recentOrders = orders.slice(0, 5);
+
+  if (loading) {
+    return (
+      <div className="flex h-screen bg-[#FDF5E6]">
+        <AdminSidebar />
+        <div className="flex-grow flex items-center justify-center">
+          <Loader2 className="animate-spin text-crimson" size={40} />
+        </div>
+      </div>
+    );
+  }
+
+  const stats = [
+    { label: "Total Revenue", value: `৳ ${totalRevenue.toLocaleString()}`, icon: DollarSign, color: "bg-blue-500" },
+    { label: "Total Orders", value: totalOrders.toString(), icon: ShoppingBag, color: "bg-purple-500" },
+    { label: "Active Customers", value: activeCustomers.toString(), icon: Users, color: "bg-green-500" },
+    { label: "Pending Shipments", value: pendingShipments.toString(), icon: Package, color: "bg-orange-500" },
+  ];
+
   return (
     <div className="flex min-h-screen bg-[#FDF5E6]">
       <AdminSidebar />
@@ -22,20 +83,12 @@ export default function AdminDashboard() {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-          {[
-            { label: "Total Revenue", value: "৳ 1,24,500", icon: DollarSign, color: "bg-blue-500" },
-            { label: "Total Orders", value: "142", icon: ShoppingBag, color: "bg-purple-500" },
-            { label: "Active Customers", value: "892", icon: Users, color: "bg-green-500" },
-            { label: "Pending Shipments", value: "8", icon: Package, color: "bg-orange-500" },
-          ].map((stat) => (
+          {stats.map((stat) => (
             <div key={stat.label} className="bg-white p-6 rounded-sm border border-[#D4AF37]/20 shadow-sm">
               <div className="flex justify-between items-start mb-4">
                 <div className={`${stat.color} p-3 rounded-lg text-white`}>
                   <stat.icon size={20} />
                 </div>
-                <span className="text-green-500 text-xs font-bold flex items-center">
-                  <TrendingUp size={14} className="mr-1" /> +12%
-                </span>
               </div>
               <p className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-1">{stat.label}</p>
               <h3 className="text-2xl font-bold text-[#2F2F2F]">{stat.value}</h3>
@@ -47,14 +100,11 @@ export default function AdminDashboard() {
         <div className="bg-white p-6 rounded-sm border border-[#D4AF37]/20 shadow-sm mb-10">
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-xl font-display text-[#2F2F2F]">Revenue Overview</h2>
-            <select className="bg-gray-50 border border-gray-200 text-xs p-2 focus:outline-none">
-               <option>Last 7 Days</option>
-               <option>Last 30 Days</option>
-            </select>
+            <div className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Real-time Data</div>
           </div>
           <div className="h-80 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={MOCK_SALES_DATA}>
+              <AreaChart data={last7Days}>
                 <defs>
                   <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#8B0000" stopOpacity={0.1}/>
@@ -79,20 +129,29 @@ export default function AdminDashboard() {
            <div className="bg-white p-6 rounded-sm border border-[#D4AF37]/20 shadow-sm">
               <h3 className="text-lg font-display mb-6">Recent Alerts</h3>
               <div className="space-y-4">
-                 <div className="flex gap-4 p-4 bg-orange-50 border-l-4 border-orange-500">
-                    <AlertCircle className="text-orange-500 shrink-0" size={20} />
-                    <div>
-                       <p className="text-sm font-bold text-orange-800">Low Stock Warning</p>
-                       <p className="text-xs text-orange-700 mt-1">"Crimson Banarasi Silk" is down to 3 units.</p>
-                    </div>
-                 </div>
-                 <div className="flex gap-4 p-4 bg-red-50 border-l-4 border-red-500">
-                    <AlertCircle className="text-red-500 shrink-0" size={20} />
-                    <div>
-                       <p className="text-sm font-bold text-red-800">Urgent Order</p>
-                       <p className="text-xs text-red-700 mt-1">Order #8821 requires immediate shipping.</p>
-                    </div>
-                 </div>
+                 {lowStockProducts.length > 0 ? (
+                    lowStockProducts.map(p => (
+                      <div key={p.id} className="flex gap-4 p-4 bg-orange-50 border-l-4 border-orange-500">
+                        <AlertCircle className="text-orange-500 shrink-0" size={20} />
+                        <div>
+                           <p className="text-sm font-bold text-orange-800">Low Stock Warning</p>
+                           <p className="text-xs text-orange-700 mt-1">"{p.name}" is down to {p.stock} units.</p>
+                        </div>
+                      </div>
+                    ))
+                 ) : (
+                    <p className="text-xs text-gray-400 italic">No low stock alerts.</p>
+                 )}
+
+                 {orders.filter(o => o.status === OrderStatus.PLACED).slice(0, 3).map(o => (
+                   <div key={o.id} className="flex gap-4 p-4 bg-red-50 border-l-4 border-red-500">
+                      <AlertCircle className="text-red-500 shrink-0" size={20} />
+                      <div>
+                         <p className="text-sm font-bold text-red-800">New Order</p>
+                         <p className="text-xs text-red-700 mt-1">Order #{o.id.slice(-6).toUpperCase()} requires attention.</p>
+                      </div>
+                   </div>
+                 ))}
               </div>
            </div>
         </div>

@@ -40,8 +40,8 @@ export function ContactPage() {
         </div>
         <div className="p-6 bg-white border border-warm-border rounded-2xl">
           <h3 className="font-display text-lg text-[#2D2D2D] mb-3">Get in Touch</h3>
-          <p className="text-sm text-gray-500">Phone: +880 1234-567890</p>
-          <p className="text-sm text-gray-500 mt-1">Email: hello@smwardrobe.com</p>
+          <p className="text-sm text-gray-500">Phone: +8801686235328</p>
+          <p className="text-sm text-gray-500 mt-1">Email: fantastic.004.group@gmail.com</p>
         </div>
       </div>
     </StaticPageLayout>
